@@ -1,8 +1,4 @@
 <?php
-/*
-Template Name: News Single Page
-Template Post Type: News
-*/
 /**
  * Single News Post Template
  * Custom Post Type: news
@@ -36,19 +32,6 @@ while (have_posts()) : the_post();
         'post_status'    => 'publish',
     ]);
 ?>
-
-<!-- ============================================================
-     PAGE HERO BANNER
-     ============================================================ -->
-<div class="inner-page-hero">
-    <div class="inner-page-hero-content">
-        <p class="caption-eyebrow">Department of Education &ndash; Region XI</p>
-        <h1>News &amp; Updates</h1>
-        <span class="caption-divider"></span>
-        <p class="caption-sub">District of Banaybanay, Division of Davao Oriental</p>
-    </div>
-</div>
-
 <!-- Breadcrumb -->
 <div class="page-breadcrumb">
     <div class="container">

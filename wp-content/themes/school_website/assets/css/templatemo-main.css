@@ -80,8 +80,8 @@ img { max-width: 100%; height: auto; display: block; }
 /* ============================================================
    HEADER STYLES — Top Header + Main Nav
    ============================================================ */
-
-/* #site-wrapper{
+/* 
+#site-wrapper{
   position: fixed;
   top: 0;           
   left: 0;
@@ -199,15 +199,18 @@ img { max-width: 100%; height: auto; display: block; }
   text-transform: uppercase;
   letter-spacing: 0.8px;
   padding: 16px 18px;
-  border-bottom: 3px solid transparent;
+  /* border-bottom: 3px solid transparent; */
   transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 
 .menu-wrap ul li a:hover,
 .menu-wrap ul li.current-menu-item > a,
-.menu-wrap ul li.current_page_item > a {
+.menu-wrap ul li.current_page_item > a,
+.menu-wrap ul li.current-menu-ancestor > a,
+.menu-wrap ul li.current-menu-parent > a {
   color: var(--deped-yellow);
   background: rgba(0,0,0,0.15);
+  border-top: 3px solid var(--deped-yellow);
 }
 
 /* Dropdown */

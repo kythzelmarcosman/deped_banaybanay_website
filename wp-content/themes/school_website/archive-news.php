@@ -1,23 +1,5 @@
 <?php
-/**
- * Template Name: News Page
- *
- * Displays all News custom post type entries.
- * Custom Fields (ACF): news_image (image), news_content (wysiwyg/textarea)
- */
 get_header(); ?>
-
-<!-- ============================================================
-     PAGE HERO BANNER
-     ============================================================ -->
-<div class="inner-page-hero">
-    <div class="inner-page-hero-content">
-        <p class="caption-eyebrow">Department of Education &ndash; Region XI</p>
-        <h1>News &amp; Updates</h1>
-        <span class="caption-divider"></span>
-        <p class="caption-sub">Latest announcements and updates from the District of Banaybanay</p>
-    </div>
-</div>
 
 <!-- Breadcrumb -->
 <div class="page-breadcrumb">

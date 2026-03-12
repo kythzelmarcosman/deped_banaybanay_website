@@ -1,25 +1,6 @@
 <?php /* Template Name: PSDS Page */
 get_header(); ?>
 
-<!-- Page Hero Banner -->
-<div class="inner-page-hero">
-    <div class="inner-page-hero-content">
-        <p class="caption-eyebrow">Department of Education &ndash; Region XI</p>
-        <h1>Meet the PSDS</h1>
-        <span class="caption-divider"></span>
-        <p class="caption-sub">District of Banaybanay, Division of Davao Oriental</p>
-    </div>
-</div>
-
-<!-- Breadcrumb -->
-<div class="page-breadcrumb">
-    <div class="container">
-        <span><a href="<?php echo home_url('/'); ?>"><i class="fa fa-home"></i> Home</a></span>
-        <span class="bc-sep"><i class="fa fa-angle-right"></i></span>
-        <span class="bc-current">Meet the PSDS</span>
-    </div>
-</div>
-
 <!-- Main Body -->
 <div class="home-body">
 <div class="container">

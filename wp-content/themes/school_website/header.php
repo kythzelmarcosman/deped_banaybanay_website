@@ -81,13 +81,16 @@
 
     </div>
 
-    <!-- Scrolling Announcement Banner (under nav) -->
-    <div class="announcement-bar">
-        <div class="announcement-label"><i class="fa fa-bullhorn"></i></div>
-        <div class="announcement-ticker">
-            <span><?php echo get_theme_mod('announcement_text', 'No suspension of classes today. &nbsp;&nbsp;|&nbsp;&nbsp; Brigada Eskwela 2026 – May 30 to June 4. &nbsp;&nbsp;|&nbsp;&nbsp; Region XI Science Fair – June 15. &nbsp;&nbsp;|&nbsp;&nbsp; New Teachers Orientation – June 7. &nbsp;&nbsp;|&nbsp;&nbsp; Check the latest District Memoranda for updates.'); ?></span>
+    <?php
+    $announcement = get_announcement_ticker_content();
+    if ( $announcement ) : ?>
+        <div class="announcement-bar">
+            <div class="announcement-label"><i class="fa fa-bullhorn"></i></div>
+            <div class="announcement-ticker">
+                <span><?php echo esc_html( $announcement ); ?></span>
+            </div>
         </div>
-    </div>
+    <?php endif; ?>
 </div>
 
 <script>

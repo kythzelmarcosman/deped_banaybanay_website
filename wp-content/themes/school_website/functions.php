@@ -229,3 +229,398 @@ function change_school_title_placeholder($title) {
     return $title;
 }
 add_filter('enter_title_here', 'change_school_title_placeholder');
+
+/**
+ * Clean Programs → Contents Workflow
+ * Fully independent of ACF fields to avoid extra editors
+ */
+
+/* ------------------------------
+1️⃣ Add Meta Box to Program Editor
+------------------------------- */
+add_action('add_meta_boxes', function() {
+
+    add_meta_box(
+        'program_contents_box',
+        'Contents',
+        'program_contents_box_callback',
+        'program', // Shows only in Programs
+        'normal',
+        'high'
+    );
+
+});
+
+/* Render Add Content Button + Contents Table */
+function program_contents_box_callback($post){
+    // Add Content Button
+    $add_url = admin_url('post-new.php?post_type=content&program_id=' . $post->ID);
+    echo '<p><a href="' . esc_url($add_url) . '" class="button button-primary">+ Add Content</a></p>';
+
+    // Contents Table
+    $contents = get_posts([
+        'post_type' => 'content',
+        'meta_query' => [
+            ['key' => 'parent_program', 'value' => $post->ID]
+        ],
+        'posts_per_page' => -1,
+        'orderby' => 'date',
+        'order' => 'DESC',
+    ]);
+
+    if ($contents) {
+        echo '<table class="widefat striped"><thead><tr><th>Content</th><th>Date</th><th>Actions</th></tr></thead><tbody>';
+        foreach ($contents as $content) {
+            echo '<tr>';
+            echo '<td>' . esc_html($content->post_title) . '</td>';
+            echo '<td>' . get_the_date('', $content) . '</td>';
+            echo '<td><a href="' . get_edit_post_link($content->ID) . '">Edit</a></td>';
+            echo '</tr>';
+        }
+        echo '</tbody></table>';
+    } else {
+        echo '<p>No contents assigned.</p>';
+    }
+}
+
+/* ------------------------------
+2️⃣ Auto-fill Parent Program Field in Contents
+------------------------------- */
+add_filter('acf/load_value/name=parent_program', function($value, $post_id, $field){
+
+    if (isset($_GET['program_id'])) {
+        return intval($_GET['program_id']);
+    }
+
+    return $value;
+
+}, 10, 3);
+
+/* ------------------------------
+3️⃣ Back to Program Button in Content Editor
+------------------------------- */
+add_action('edit_form_after_title', function($post){
+
+    if ($post->post_type !== 'content') return;
+
+    $program_id = 0;
+
+    // Use URL parameter if coming from Add Content button
+    if (isset($_GET['program_id'])) {
+        $program_id = intval($_GET['program_id']);
+    }
+    // Fallback: use parent_program field if editing existing content
+    elseif ($parent_program = get_field('parent_program', $post->ID)) {
+        $program_id = $parent_program;
+    }
+
+    if ($program_id) {
+        $program_title = get_the_title($program_id);
+        $program_link = get_edit_post_link($program_id);
+
+        echo '<div style="margin-bottom:10px;">';
+        echo '<a class="button button-secondary" href="' . esc_url($program_link) . '">&larr; Back to Program: ' . esc_html($program_title) . '</a>';
+        echo '</div>';
+    }
+
+});
+
+/* ------------------------------
+4️⃣ Optional: Frontend Display Function
+------------------------------- */
+function display_program_contents($program_id){
+    $contents = get_posts([
+        'post_type' => 'content',
+        'meta_query' => [
+            ['key' => 'parent_program', 'value' => $program_id]
+        ],
+        'posts_per_page' => -1,
+    ]);
+
+    if ($contents) {
+        echo '<h2>Contents</h2><ul>';
+        foreach ($contents as $content) {
+            echo '<li><a href="' . get_permalink($content->ID) . '">' . get_the_title($content->ID) . '</a></li>';
+        }
+        echo '</ul>';
+    }
+}
+
+
+
+// =============================================
+// SITE SETTINGS - Custom Admin Menu
+// =============================================
+
+add_action( 'admin_menu', 'site_settings_admin_menu' );
+
+function site_settings_admin_menu() {
+
+    // --- Page IDs (update these to match your actual page IDs) ---
+    $home_banner_id      = 9;
+    $district_profile_id = 63;
+    $meet_psds_id        = 106;
+    $contact_us_id       = 26;
+
+    // --- Top-level "Site Settings" menu ---
+    add_menu_page(
+        'Site Settings',           // Page title
+        'Site Settings',           // Menu label
+        'edit_pages',              // Capability required
+        'site-settings',           // Menu slug
+        'site_settings_main_page', // Callback function
+        'dashicons-admin-settings',// Icon (Dashicon)
+        25                         // Position in menu
+    );
+
+    // --- Child: Home Image Banner ---
+    add_submenu_page(
+        'site-settings',
+        'Home Image Banner',
+        'Home Image Banner',
+        'edit_pages',
+        esc_url( admin_url( 'post.php?post=' . $home_banner_id . '&action=edit' ) ),
+        null
+    );
+
+    // --- Child: District Profile ---
+    add_submenu_page(
+        'site-settings',
+        'District Profile',
+        'District Profile',
+        'edit_pages',
+        esc_url( admin_url( 'post.php?post=' . $district_profile_id . '&action=edit' ) ),
+        null
+    );
+
+    // --- Child: Meet the PSDS ---
+    add_submenu_page(
+        'site-settings',
+        'Meet the PSDS',
+        'Meet the PSDS',
+        'edit_pages',
+        esc_url( admin_url( 'post.php?post=' . $meet_psds_id . '&action=edit' ) ),
+        null
+    );
+
+    // --- Child: Contact Us ---
+    add_submenu_page(
+        'site-settings',
+        'Contact Us',
+        'Contact Us',
+        'edit_pages',
+        esc_url( admin_url( 'post.php?post=' . $contact_us_id . '&action=edit' ) ),
+        null
+    );
+
+    // Remove the auto-generated duplicate first child
+    remove_submenu_page( 'site-settings', 'site-settings' );
+}
+
+// --- Main page callback (landing page for the top-level menu) ---
+function site_settings_main_page() {
+    echo '<div class="wrap">';
+    echo '<h1>Site Settings</h1>';
+    echo '<p>Select a section below to edit its content:</p>';
+    echo '<ul style="list-style:disc; padding-left:20px;">';
+    $items = [
+        'Home Image Banner',
+        'District Profile',
+        'Meet the PSDS',
+        'Contact Us',
+    ];
+    foreach ( $items as $item ) {
+        echo '<li><strong>' . esc_html( $item ) . '</strong></li>';
+    }
+    echo '</ul>';
+    echo '</div>';
+}
+
+// /**
+//  * Hide Posts, Pages, and Comments from Admin Sidebar
+//  */
+function hide_default_admin_menus() {
+    remove_menu_page( 'edit.php' );          // Posts
+    remove_menu_page( 'edit.php?post_type=page' ); // Pages
+    remove_menu_page( 'edit-comments.php' ); // Comments
+}
+add_action( 'admin_menu', 'hide_default_admin_menus', 999 );
+
+// Remove "Add New" from Admin Bar (top bar)
+add_action( 'admin_bar_menu', 'remove_add_new_page_adminbar', 999 );
+
+function remove_add_new_page_adminbar( $wp_admin_bar ) {
+    $wp_admin_bar->remove_node( 'new-page' );
+}
+
+// Remove "Add New" button on the Edit Page screen (post.php)
+add_action( 'admin_head-post.php', 'remove_add_new_button_edit_screen' );
+
+function remove_add_new_button_edit_screen() {
+    global $post_type;
+    if ( $post_type === 'page' ) {
+        echo '<style>
+            .page-title-action,
+            #wpbody-content .wrap .page-title-action { 
+                display: none !important; 
+            }
+        </style>';
+    }
+}
+
+// =============================================
+// URGENT ANNOUNCEMENT - Custom Admin Menu
+// =============================================
+
+add_action( 'admin_menu', 'announcement_admin_menu' );
+
+function announcement_admin_menu() {
+    $urgent_announce_id = 279;
+
+    add_menu_page(
+        'Announcement',
+        'Announcement',
+        'edit_pages',
+        esc_url( admin_url( 'post.php?post=' . $urgent_announce_id . '&action=edit' ) ),
+        null,
+        'dashicons-megaphone',
+        25
+    );
+}
+
+
+// =============================================
+// ANNOUNCEMENT - Meta Box (Toggle + Textarea)
+// =============================================
+
+add_action( 'add_meta_boxes', 'announcement_add_meta_box' );
+
+function announcement_add_meta_box() {
+    add_meta_box(
+        'announcement_settings',
+        'Announcement Settings',
+        'announcement_meta_box_callback',
+        'page',
+        'normal',
+        'high'
+    );
+}
+
+function announcement_meta_box_callback( $post ) {
+    if ( $post->ID !== 279 ) return; // Only show on your Announcement page
+
+    wp_nonce_field( 'announcement_save_meta', 'announcement_nonce' );
+
+    $is_active    = get_post_meta( $post->ID, '_announcement_active', true );
+    $raw_content  = get_post_meta( $post->ID, '_announcement_content', true );
+    ?>
+
+    <style>
+        .ann-toggle-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .ann-toggle { position: relative; display: inline-block; width: 52px; height: 28px; }
+        .ann-toggle input { opacity: 0; width: 0; height: 0; }
+        .ann-slider {
+            position: absolute; cursor: pointer; inset: 0;
+            background-color: #ccc; border-radius: 28px; transition: .3s;
+        }
+        .ann-slider:before {
+            content: ""; position: absolute;
+            height: 20px; width: 20px; left: 4px; bottom: 4px;
+            background: white; border-radius: 50%; transition: .3s;
+        }
+        input:checked + .ann-slider { background-color: #2271b1; }
+        input:checked + .ann-slider:before { transform: translateX(24px); }
+        .ann-status-label { font-weight: 600; font-size: 14px; }
+        .ann-status-label.active { color: #2271b1; }
+        .ann-status-label.inactive { color: #999; }
+        #announcement_content_wrap { transition: opacity 0.3s; }
+        #announcement_content_wrap.hidden { opacity: 0.3; pointer-events: none; }
+        #announcement_content_wrap label { display: block; margin-bottom: 6px; font-weight: 600; }
+        #announcement_content_wrap p.desc { color: #666; font-size: 12px; margin-top: 6px; }
+    </style>
+
+    <div class="ann-toggle-wrap">
+        <label class="ann-toggle">
+            <input type="checkbox" id="announcement_active" name="announcement_active" value="1" <?php checked( $is_active, '1' ); ?>>
+            <span class="ann-slider"></span>
+        </label>
+        <span class="ann-status-label <?php echo $is_active ? 'active' : 'inactive'; ?>" id="ann-status-text">
+            <?php echo $is_active ? 'Active' : 'Inactive'; ?>
+        </span>
+    </div>
+
+    <div id="announcement_content_wrap" class="<?php echo ! $is_active ? 'hidden' : ''; ?>">
+        <label for="announcement_content">Announcements (one per line):</label>
+        <textarea
+            id="announcement_content"
+            name="announcement_content"
+            rows="6"
+            style="width:100%; font-family: monospace;"
+            placeholder="announcement 1&#10;announcement 2&#10;announcement 3"
+        ><?php echo esc_textarea( $raw_content ); ?></textarea>
+        <p class="desc">
+            Enter each announcement on its own line.<br>
+            They will display as: <strong>announcement 1 | announcement 2 | announcement 3</strong>
+        </p>
+    </div>
+
+    <script>
+        (function() {
+            const toggle   = document.getElementById('announcement_active');
+            const wrap     = document.getElementById('announcement_content_wrap');
+            const label    = document.getElementById('ann-status-text');
+
+            function updateUI() {
+                if (toggle.checked) {
+                    wrap.classList.remove('hidden');
+                    label.textContent = 'Active';
+                    label.className   = 'ann-status-label active';
+                } else {
+                    wrap.classList.add('hidden');
+                    label.textContent = 'Inactive';
+                    label.className   = 'ann-status-label inactive';
+                }
+            }
+
+            toggle.addEventListener('change', updateUI);
+        })();
+    </script>
+
+    <?php
+}
+
+
+// =============================================
+// ANNOUNCEMENT - Save Meta Data
+// =============================================
+
+add_action( 'save_post', 'announcement_save_meta' );
+
+function announcement_save_meta( $post_id ) {
+    if ( ! isset( $_POST['announcement_nonce'] ) ) return;
+    if ( ! wp_verify_nonce( $_POST['announcement_nonce'], 'announcement_save_meta' ) ) return;
+    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
+    if ( ! current_user_can( 'edit_page', $post_id ) ) return;
+    if ( $post_id !== 279 ) return;
+
+    $is_active = isset( $_POST['announcement_active'] ) ? '1' : '0';
+    update_post_meta( $post_id, '_announcement_active', $is_active );
+
+    $raw = isset( $_POST['announcement_content'] ) ? sanitize_textarea_field( $_POST['announcement_content'] ) : '';
+    update_post_meta( $post_id, '_announcement_content', $raw );
+}
+
+
+// =============================================
+// ANNOUNCEMENT - Helper to get formatted output
+// =============================================
+
+function get_announcement_ticker_content() {
+    $is_active = get_post_meta( 279, '_announcement_active', true );
+    if ( $is_active !== '1' ) return null;
+
+    $raw   = get_post_meta( 279, '_announcement_content', true );
+    $lines = array_filter( array_map( 'trim', explode( "\n", $raw ) ) );
+
+    return ! empty( $lines ) ? implode( ' | ', $lines ) : null;
+}

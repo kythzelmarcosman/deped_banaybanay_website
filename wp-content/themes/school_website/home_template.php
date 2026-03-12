@@ -133,138 +133,92 @@ get_header(); ?>
                         </div>
                     </section>
 
-                    <section id="issuances" class="home-section">
+<section id="issuances" class="home-section">
     <div class="section-heading">
         <h2><i class="fa fa-file-text-o"></i> District Issuances</h2>
         <a href="<?php echo esc_url(home_url('/issuances')); ?>" class="view-all-link">View All <i class="fa fa-arrow-right"></i></a>
     </div>
 
     <?php
-    // Tab groups — keys must match the ACF select field values exactly
-    $issuance_types = [
-        'District Memoranda' => [ 'label' => 'District Memos',    'tab' => 'district' ],
-        'Division Memoranda' => [ 'label' => 'Division Memos',    'tab' => 'division' ],
-        'DepEd Advisory'      => [ 'label' => 'DepEd Advisories',  'tab' => 'advisory' ],
-    ];
-
-    // Single query — fetch all recent issuances at once
     $issuances_query = new WP_Query([
         'post_type'      => 'issuance',
-        'posts_per_page' => 60,
+        'posts_per_page' => 8,
         'post_status'    => 'publish',
         'orderby'        => 'date',
         'order'          => 'DESC',
     ]);
-
-    // Group by Type ACF field
-    $grouped = array_fill_keys(array_keys($issuance_types), []);
-
-    if ($issuances_query->have_posts()) {
-        while ($issuances_query->have_posts()) {
-            $issuances_query->the_post();
-            $type = function_exists('get_field') ? get_field('type') : '';
-            if ($type && isset($grouped[$type])) {
-                $grouped[$type][] = [
-                    'title'     => get_the_title(),
-                    'permalink' => get_permalink(),
-                    'date'      => get_the_date('F j, Y'),
-                ];
-            }
-        }
-        wp_reset_postdata();
-    }
-
-    // First tab that has items becomes the default active tab
-    $first_active = array_key_first($issuance_types);
-    foreach ($issuance_types as $key => $info) {
-        if (!empty($grouped[$key])) { $first_active = $key; break; }
-    }
     ?>
 
     <div class="issuances-panel">
 
         <div class="issuances-search">
-            <input type="text" id="memo-search" placeholder="Search issuances...">
+            <input type="text" id="memo-search" placeholder="Search issuances..." autocomplete="off">
             <button type="button"><i class="fa fa-search"></i></button>
         </div>
 
-        <div class="issuances-tabs">
-            <?php foreach ($issuance_types as $key => $info) : ?>
-                <button
-                    class="tab-btn <?php echo $key === $first_active ? 'active' : ''; ?>"
-                    data-tab="<?php echo esc_attr($info['tab']); ?>"
-                >
-                    <?php echo esc_html($info['label']); ?>
-                    <?php if (!empty($grouped[$key])) : ?>
-                        <span class="tab-count"><?php echo count($grouped[$key]); ?></span>
-                    <?php endif; ?>
-                </button>
-            <?php endforeach; ?>
-        </div>
-
-        <?php foreach ($issuance_types as $key => $info) :
-            $items     = $grouped[$key];
-            $is_active = ($key === $first_active);
-        ?>
-            <ul
-                class="issuances-list <?php echo $is_active ? '' : 'issuances-hidden'; ?>"
-                id="tab-<?php echo esc_attr($info['tab']); ?>"
-            >
-                <?php if (!empty($items)) : ?>
-                    <?php foreach ($items as $item) : ?>
-                        <li>
-                            <i class="fa fa-file-pdf-o"></i>
-                            <div>
-                                <a href="<?php echo esc_url($item['permalink']); ?>">
-                                    <?php echo esc_html($item['title']); ?>
-                                </a>
-                                <span class="memo-date"><?php echo esc_html($item['date']); ?></span>
-                            </div>
-                        </li>
-                    <?php endforeach; ?>
-                <?php else : ?>
-                    <li class="issuances-empty">
-                        <i class="fa fa-inbox"></i>
-                        <div>No <?php echo esc_html($info['label']); ?> available yet.</div>
+        <?php if ($issuances_query->have_posts()) : ?>
+            <ul class="issuances-list" id="issuances-home-list">
+                <?php while ($issuances_query->have_posts()) : $issuances_query->the_post(); ?>
+                    <li data-title="<?php echo esc_attr(strtolower(get_the_title())); ?>">
+                        <i class="fa fa-file-pdf-o"></i>
+                        <div>
+                            <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+                            <span class="memo-date"><?php echo get_the_date('F j, Y'); ?></span>
+                        </div>
                     </li>
-                <?php endif; ?>
+                <?php endwhile; wp_reset_postdata(); ?>
             </ul>
-        <?php endforeach; ?>
+
+            <div id="issuances-home-noresults" style="display:none;" class="issuances-empty">
+                <i class="fa fa-search"></i>
+                <div>No issuances matched your search.</div>
+            </div>
+        <?php else : ?>
+            <div class="issuances-empty">
+                <i class="fa fa-inbox"></i>
+                <div>No issuances have been published yet.</div>
+            </div>
+        <?php endif; ?>
 
     </div><!-- /.issuances-panel -->
 </section>
 
-<?php /* ── Add this CSS once (e.g. in style.css) ── */ ?>
+<script>
+(function () {
+    var input    = document.getElementById('memo-search');
+    var list     = document.getElementById('issuances-home-list');
+    var noResult = document.getElementById('issuances-home-noresults');
+    if (!input || !list) return;
+
+    input.addEventListener('input', function () {
+        var q       = this.value.toLowerCase().trim();
+        var items   = list.querySelectorAll('li');
+        var visible = 0;
+        items.forEach(function (li) {
+            var match = !q || (li.dataset.title || '').includes(q);
+            li.style.display = match ? '' : 'none';
+            if (match) visible++;
+        });
+        list.style.display      = visible === 0 ? 'none'  : '';
+        noResult.style.display  = visible === 0 ? 'block' : 'none';
+    });
+})();
+</script>
+
 <style>
-.tab-count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 5px;
-    border-radius: 10px;
-    background: var(--deped-blue);
-    color: var(--white);
-    font-size: 11px;
-    font-weight: 700;
-    margin-left: 6px;
-    line-height: 1;
-}
-.tab-btn.active .tab-count {
-    background: var(--white);
-    color: var(--deped-blue);
-}
 .issuances-empty {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 24px 20px;
     color: var(--text-light);
     font-style: italic;
-    padding: 20px !important;
+    font-size: 14px;
 }
 .issuances-empty .fa {
     color: var(--deped-blue);
-    opacity: 0.25;
-    font-size: 20px !important;
-    margin-top: 0 !important;
+    opacity: 0.3;
+    font-size: 20px;
 }
 </style>
 
@@ -345,43 +299,71 @@ get_header(); ?>
                     <!-- Programs & Projects -->
                     <div class="sidebar-widget">
                         <h3 class="sidebar-widget-title">Programs &amp; Projects</h3>
-                        <div class="programs-grid">
-                            <a href="#" class="program-item">
-                                <span class="prog-icon prog-k12">K-12</span>
-                                <span>K-12</span>
-                            </a>
-                            <a href="#" class="program-item">
-                                <span class="prog-icon"><i class="fa fa-book"></i></span>
-                                <span>Curriculum</span>
-                            </a>
-                            <a href="#" class="program-item">
-                                <span class="prog-icon prog-als">ALS</span>
-                                <span>ALS</span>
-                            </a>
-                            <a href="#" class="program-item">
-                                <span class="prog-icon prog-sbm">SBM</span>
-                                <span>SBM</span>
-                            </a>
-                            <a href="#" class="program-item">
-                                <span class="prog-icon"><i class="fa fa-users"></i></span>
-                                <span>Brigada Eskwela</span>
-                            </a>
-                            <a href="#" class="program-item">
-                                <span class="prog-icon"><i class="fa fa-institution"></i></span>
-                                <span>SGC</span>
-                            </a>
-                        </div>
+                        <?php
+                        $programs_query = new WP_Query([
+                            'post_type'      => 'program',
+                            'posts_per_page' => -1,
+                            'post_status'    => 'publish',
+                            'orderby'        => 'title',
+                            'order'          => 'ASC',
+                        ]);
+                        ?>
+                        <?php if ($programs_query->have_posts()) : ?>
+                            <ul class="transparency-list">
+                                <?php while ($programs_query->have_posts()) : $programs_query->the_post(); ?>
+                                    <li>
+                                        <a href="<?php the_permalink(); ?>">
+                                            <i class="fa fa-graduation-cap"></i>
+                                            <?php the_title(); ?>
+                                        </a>
+                                    </li>
+                                <?php endwhile; wp_reset_postdata(); ?>
+                            </ul>
+                        <?php else : ?>
+                            <ul class="transparency-list">
+                                <li>
+                                    <a href="#">
+                                        <i class="fa fa-inbox"></i>
+                                        No programs yet.
+                                    </a>
+                                </li>
+                            </ul>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Transparency Seal -->
                     <div class="sidebar-widget transparency-widget">
                         <h3 class="sidebar-widget-title">Transparency Seal</h3>
-                        <ul class="transparency-list">
-                            <li><a href="#"><i class="fa fa-id-card-o"></i> Citizens Charter</a></li>
-                            <li><a href="#"><i class="fa fa-bar-chart"></i> Financial Reports</a></li>
-                            <li><a href="#"><i class="fa fa-shopping-cart"></i> Procurement</a></li>
-                            <li><a href="#"><i class="fa fa-sitemap"></i> Org. Structure</a></li>
-                        </ul>
+                        <?php
+                        $transparency_query = new WP_Query([
+                            'post_type'      => 'transparency',
+                            'posts_per_page' => -1,
+                            'post_status'    => 'publish',
+                            'orderby'        => 'title',
+                            'order'          => 'ASC',
+                        ]);
+                        ?>
+                        <?php if ($transparency_query->have_posts()) : ?>
+                            <ul class="transparency-list">
+                                <?php while ($transparency_query->have_posts()) : $transparency_query->the_post(); ?>
+                                    <li>
+                                        <a href="<?php the_permalink(); ?>">
+                                            <i class="fa fa-file-text-o"></i>
+                                            <?php the_title(); ?>
+                                        </a>
+                                    </li>
+                                <?php endwhile; wp_reset_postdata(); ?>
+                            </ul>
+                        <?php else : ?>
+                            <ul class="transparency-list">
+                                <li>
+                                    <a href="#">
+                                        <i class="fa fa-inbox"></i>
+                                        No documents yet.
+                                    </a>
+                                </li>
+                            </ul>
+                        <?php endif; ?>
                     </div>
 
                 </aside><!-- /.sidebar-col -->
