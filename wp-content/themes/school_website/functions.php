@@ -167,6 +167,13 @@ function school_website_scripts() {
 }
 add_action( 'wp_enqueue_scripts', 'school_website_scripts' );
 
+// Enqueue Swiper.js from CDN for the homepage slider
+function enqueue_swiper() {
+    wp_enqueue_style('swiper-css', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css');
+    wp_enqueue_script('swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js', array(), null, true);
+}
+add_action('wp_enqueue_scripts', 'enqueue_swiper');
+
 /**
  * Implement the Custom Header feature.
  */
@@ -623,4 +630,113 @@ function get_announcement_ticker_content() {
     $lines = array_filter( array_map( 'trim', explode( "\n", $raw ) ) );
 
     return ! empty( $lines ) ? implode( ' | ', $lines ) : null;
+}
+
+/**
+ * AJAX handler for schools pagination.
+ * Paste this into your theme's functions.php
+ */
+add_action( 'wp_ajax_load_schools_page',        'handle_load_schools_page' );
+add_action( 'wp_ajax_nopriv_load_schools_page', 'handle_load_schools_page' );
+
+function handle_load_schools_page() {
+
+    check_ajax_referer( 'schools_pagination', 'nonce' );
+
+    $paged    = isset( $_POST['paged'] )    ? absint( $_POST['paged'] )    : 1;
+    $per_page = isset( $_POST['per_page'] ) ? absint( $_POST['per_page'] ) : 6;
+
+    $args = array(
+        'post_type'      => 'school',
+        'posts_per_page' => $per_page,
+        'paged'          => $paged,
+        'orderby'        => 'title',
+        'order'          => 'ASC',
+    );
+
+    $query = new WP_Query( $args );
+
+    ob_start();
+
+    if ( $query->have_posts() ) :
+        while ( $query->have_posts() ) : $query->the_post();
+
+            $school_image   = get_field('school_image');
+            $school_id      = get_field('school_id');
+            $school_head    = get_field('school_head');
+            $address        = get_field('address');
+            $map_image      = get_field('map_image');
+            $map_link       = get_field('map_link');
+
+            $contact        = get_field('contact_information');
+            $email          = $contact['email']          ?? '';
+            $contact_number = $contact['contact_number'] ?? '';
+    ?>
+
+    <div class="school-card">
+
+        <div class="school-img">
+            <?php if ( $school_image ) : ?>
+                <img src="<?php echo esc_url( $school_image['url'] ); ?>"
+                     alt="<?php the_title_attribute(); ?>"
+                     loading="lazy">
+            <?php endif; ?>
+        </div>
+
+        <div class="school-info">
+
+            <h5><?php the_title(); ?></h5>
+
+            <?php if ( $school_id ) : ?>
+            <p><strong>School ID:</strong> <?php echo esc_html( $school_id ); ?></p>
+            <?php endif; ?>
+
+            <?php if ( $school_head ) : ?>
+            <p><strong>School Head:</strong> <?php echo esc_html( $school_head ); ?></p>
+            <?php endif; ?>
+
+            <?php if ( $contact_number || $email ) : ?>
+            <p class="contact-label">Contact</p>
+            <?php endif; ?>
+
+            <?php if ( $contact_number ) : ?>
+            <p><i class="fa fa-phone"></i> <?php echo esc_html( $contact_number ); ?></p>
+            <?php endif; ?>
+
+            <?php if ( $email ) : ?>
+            <p><i class="fa fa-envelope"></i> <?php echo esc_html( $email ); ?></p>
+            <?php endif; ?>
+
+            <?php if ( $address ) : ?>
+            <p><i class="fa fa-map-marker"></i> <?php echo esc_html( $address ); ?></p>
+            <?php endif; ?>
+
+            <?php if ( $map_image ) : ?>
+            <div class="school-map">
+                <?php if ( $map_link ) : ?>
+                    <a href="<?php echo esc_url( $map_link ); ?>" target="_blank" rel="noopener">
+                        <img src="<?php echo esc_url( $map_image['url'] ); ?>"
+                             alt="Map – <?php the_title_attribute(); ?>"
+                             loading="lazy">
+                    </a>
+                <?php else : ?>
+                    <img src="<?php echo esc_url( $map_image['url'] ); ?>"
+                         alt="Map – <?php the_title_attribute(); ?>"
+                         loading="lazy">
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
+
+        </div>
+
+    </div>
+
+    <?php
+        endwhile;
+        wp_reset_postdata();
+    endif;
+
+    $html = ob_get_clean();
+
+    wp_send_json_success( array( 'html' => $html ) );
 }

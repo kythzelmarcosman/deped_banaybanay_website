@@ -16,39 +16,25 @@
 <div id="site-wrapper">
     <div class="site-header">
 
-        <!-- Top Header: Dual Logos + Title -->
-        <div class="top-header">
-            <div class="container-fluid">
-                <div class="top-header-inner">
-
-                    <!-- Left Logo -->
-                    <div class="top-logo top-logo-left">
-                        <img src="<?php echo get_template_directory_uri(); ?>/assets/images/logo/BanaybanayDistrict_Logo.jpg" alt="">
-                    </div>
-
-                    <!-- Center Title -->
-                    <div class="top-header-center">
-                        <div class="school-tagline">
-                            DEPARTMENT OF EDUCATION - REGION XI
-                            DIVISION OF DAVAO ORIENTAL
-                        </div>
-                        <div class="school-title">
-                            DISTRICT OF BANAYBANAY
-                        </div>
-                    </div>
-
-                    <!-- Right Logo -->
-                    <div class="top-logo top-logo-right">
-                        <img src="<?php echo get_template_directory_uri(); ?>/assets/images/logo/DepEdLogo.png" alt="">
-                    </div>
-
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Header: Centered Navigation Only -->
+        <!-- Main Header: Logo Left + Navigation Right -->
         <div class="main-header">
             <div class="container">
+
+                <!-- Left Logo -->
+                <div class="header-logo">
+                    <a href="<?php echo esc_url( home_url('/') ); ?>">
+                        <img src="<?php echo get_template_directory_uri(); ?>/assets/images/logo/DepEd-Circle.png" alt="<?php bloginfo('name'); ?>">
+                    </a>
+                    <a href="<?php echo esc_url( home_url('/') ); ?>">
+                        <img src="<?php echo get_template_directory_uri(); ?>/assets/images/logo/DIVISION-OF-DAVAO-ORIENTAL-1024x1024.png" alt="<?php bloginfo('name'); ?>">
+                    </a>
+                    <a href="<?php echo esc_url( home_url('/') ); ?>">
+                        <img src="<?php echo get_template_directory_uri(); ?>/assets/images/logo/BanaybanayDistrict_Logo.png" alt="<?php bloginfo('name'); ?>">
+                    </a>
+                    <h1>
+                       DEPED BANAYBANAY DISTRICT
+                    </h1>
+                </div>
 
                 <!-- Desktop Menu -->
                 <nav id="site-navigation" class="menu-wrap hidden-sm hidden-xs">
@@ -60,8 +46,8 @@
                     ?>
                 </nav>
 
-                <!-- Mobile Menu -->
-                <nav id="mobile-navigation" class="responsive-menu text-right visible-xs visible-sm">
+                <!-- Mobile Menu Toggle -->
+                <nav id="mobile-navigation" class="responsive-menu visible-xs visible-sm">
                     <button class="toggle-menu" aria-expanded="false" aria-controls="mobile-menu">
                         <i class="fa fa-bars color-white"></i>
                         <span class="screen-reader-text">Menu</span>
@@ -94,15 +80,32 @@
 </div>
 
 <script>
-// Mobile menu toggle
 (function() {
-    var btn = document.querySelector('#mobile-navigation .toggle-menu');
+    var btn  = document.querySelector('#mobile-navigation .toggle-menu');
     var menu = document.getElementById('mobile-menu');
     if (!btn || !menu) return;
-    btn.addEventListener('click', function() {
+
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
         var expanded = btn.getAttribute('aria-expanded') === 'true';
         btn.setAttribute('aria-expanded', String(!expanded));
         menu.classList.toggle('open');
+    });
+
+    /* Close when clicking anywhere outside the menu */
+    document.addEventListener('click', function(e) {
+        if (!menu.contains(e.target) && !btn.contains(e.target)) {
+            menu.classList.remove('open');
+            btn.setAttribute('aria-expanded', 'false');
+        }
+    });
+
+    /* Close when a menu link is clicked */
+    menu.querySelectorAll('a').forEach(function(link) {
+        link.addEventListener('click', function() {
+            menu.classList.remove('open');
+            btn.setAttribute('aria-expanded', 'false');
+        });
     });
 })();
 </script>
