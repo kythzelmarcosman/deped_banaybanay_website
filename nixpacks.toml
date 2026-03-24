@@ -1,2 +1,5 @@
-[variables]
-    PHP_EXTENSIONS = "mysqli, pdo_mysql, gd, mbstring"
+[phases.setup]
+nixPkgs = ["php83", "php83Extensions.mysqli", "php83Extensions.pdo_mysql", "apacheHttpd"]
+
+[start]
+cmd = "php -S 0.0.0.0:$PORT"
