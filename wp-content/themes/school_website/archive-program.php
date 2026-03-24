@@ -24,16 +24,16 @@ $total = $programs_query->found_posts;
 <!-- ============================================================
      MAIN BODY
      ============================================================ -->
-<div class="pg-body">
-    <div class="pg-container">
+<div class="archive-body pg-body">
+    <div class="archive-container pg-container">
 
         <!-- Search + Count Bar -->
-        <div class="pg-filter-bar">
-            <span class="pg-count-label" id="pg-count">
+        <div class="filter-bar">
+            <span class="count-label" id="pg-count">
                 <i class="fa fa-th-list"></i>
                 <?php echo $total; ?> program<?php echo $total !== 1 ? 's' : ''; ?>
             </span>
-            <div class="pg-search-wrap">
+            <div class="search-wrap">
                 <input type="text" id="pg-search" placeholder="Search programs..." autocomplete="off">
                 <i class="fa fa-search"></i>
             </div>
@@ -48,7 +48,7 @@ $total = $programs_query->found_posts;
                     $excerpt     = $description ? wp_trim_words(strip_tags($description), 24, '...') : '';
                 ?>
                     <a href="<?php the_permalink(); ?>"
-                       class="pg-card"
+                       class="archive-card pg-card"
                        data-title="<?php echo esc_attr(strtolower(get_the_title())); ?>">
 
                         <div class="pg-card-icon">
@@ -58,12 +58,12 @@ $total = $programs_query->found_posts;
                         <div class="pg-card-body">
                             <h3 class="pg-card-title"><?php the_title(); ?></h3>
                             <?php if ($excerpt) : ?>
-                                <p class="pg-card-desc"><?php echo esc_html($excerpt); ?></p>
+                                <p class="archive-card-desc"><?php echo esc_html($excerpt); ?></p>
                             <?php endif; ?>
                         </div>
 
                         <div class="pg-card-footer">
-                            <span class="pg-card-link">
+                            <span class="card-link">
                                 View Program <i class="fa fa-arrow-right"></i>
                             </span>
                         </div>
@@ -73,13 +73,13 @@ $total = $programs_query->found_posts;
             </div>
 
             <!-- No search results -->
-            <div class="pg-no-results" id="pg-no-results" style="display:none;">
+            <div class="empty-state" id="pg-no-results" style="display:none;">
                 <i class="fa fa-search"></i>
                 <p>No programs matched your search.</p>
             </div>
 
         <?php else : ?>
-            <div class="pg-no-results">
+            <div class="empty-state">
                 <i class="fa fa-inbox"></i>
                 <p>No programs have been published yet.</p>
             </div>
@@ -87,183 +87,6 @@ $total = $programs_query->found_posts;
 
     </div><!-- /.pg-container -->
 </div><!-- /.pg-body -->
-
-
-<!-- ============================================================
-     STYLES
-     ============================================================ -->
-<style>
-.pg-body {
-    background: #f0f3f9;
-    padding: 56px 0 80px;
-}
-
-.pg-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 28px;
-}
-
-/* Filter bar */
-.pg-filter-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 36px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid var(--border);
-    flex-wrap: wrap;
-}
-
-.pg-count-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-mid);
-}
-.pg-count-label .fa { color: var(--deped-blue); font-size: 16px; }
-
-.pg-search-wrap {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-.pg-search-wrap input {
-    padding: 10px 38px 10px 16px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    font-size: 13px;
-    font-family: inherit;
-    color: var(--text-dark);
-    background: var(--white);
-    width: 260px;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-.pg-search-wrap input:focus {
-    border-color: var(--deped-blue);
-    box-shadow: 0 0 0 3px rgba(0,56,168,0.08);
-}
-.pg-search-wrap .fa {
-    position: absolute;
-    right: 13px;
-    color: var(--text-light);
-    font-size: 13px;
-    pointer-events: none;
-}
-
-/* Grid */
-.pg-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-}
-
-/* Card */
-.pg-card {
-    background: var(--white);
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    display: flex;
-    flex-direction: column;
-    text-decoration: none;
-    transition: box-shadow 0.25s, transform 0.25s;
-    border-top: 4px solid var(--deped-blue);
-}
-.pg-card:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-5px);
-}
-
-.pg-card-icon {
-    background: var(--deped-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 32px 24px 20px;
-}
-.pg-card-icon .fa {
-    font-size: 42px;
-    color: var(--deped-blue);
-    opacity: 0.35;
-    transition: opacity 0.2s;
-}
-.pg-card:hover .pg-card-icon .fa { opacity: 0.7; }
-
-.pg-card-body {
-    padding: 20px 24px;
-    flex: 1;
-}
-
-.pg-card-title {
-    font-size: 17px;
-    font-weight: 800;
-    color: var(--deped-dark);
-    line-height: 1.35;
-    margin: 0 0 10px;
-}
-.pg-card:hover .pg-card-title { color: var(--deped-blue); }
-
-.pg-card-desc {
-    font-size: 13px;
-    color: var(--text-light);
-    line-height: 1.7;
-    margin: 0;
-}
-
-.pg-card-footer {
-    padding: 14px 24px 20px;
-    border-top: 1px solid var(--border);
-}
-
-.pg-card-link {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--deped-blue);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    transition: gap 0.2s;
-}
-.pg-card:hover .pg-card-link { gap: 11px; }
-.pg-card-link .fa { font-size: 11px; }
-
-/* No results / empty */
-.pg-no-results {
-    text-align: center;
-    padding: 80px 24px;
-    color: var(--text-light);
-}
-.pg-no-results .fa {
-    font-size: 52px;
-    color: var(--deped-blue);
-    opacity: 0.18;
-    display: block;
-    margin-bottom: 16px;
-}
-.pg-no-results p { font-size: 15px; }
-
-/* Responsive */
-@media only screen and (max-width: 1024px) {
-    .pg-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media only screen and (max-width: 768px) {
-    .pg-body { padding: 40px 0 60px; }
-    .pg-container { padding: 0 16px; }
-    .pg-filter-bar { flex-direction: column; align-items: flex-start; }
-    .pg-search-wrap { width: 100%; }
-    .pg-search-wrap input { width: 100%; }
-}
-@media only screen and (max-width: 480px) {
-    .pg-grid { grid-template-columns: 1fr; }
-}
-</style>
 
 <!-- ============================================================
      JAVASCRIPT — Live Search

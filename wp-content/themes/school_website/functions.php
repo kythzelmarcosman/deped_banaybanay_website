@@ -367,7 +367,7 @@ function site_settings_admin_menu() {
     $home_banner_id      = 9;
     $district_profile_id = 63;
     $meet_psds_id        = 106;
-    $contact_us_id       = 26;
+    $contact_us_id       = 262;
 
     // --- Top-level "Site Settings" menu ---
     add_menu_page(

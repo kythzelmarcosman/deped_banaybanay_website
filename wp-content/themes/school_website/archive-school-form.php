@@ -31,13 +31,13 @@ $total = $forms_query->found_posts;
 <!-- ============================================================
      MAIN BODY
      ============================================================ -->
-<div class="sf-body">
-    <div class="sf-container">
+<div class="archive-body">
+    <div class="archive-container">
 
-        <div class="issuances-panel sf-panel">
+        <div class="issuances-panel archive-panel">
 
             <!-- Search Bar -->
-            <div class="issuances-search sf-search">
+            <div class="issuances-search">
                 <input
                     type="text"
                     id="sf-search-input"
@@ -50,15 +50,15 @@ $total = $forms_query->found_posts;
             </div>
 
             <!-- Results count -->
-            <div class="sf-results-row">
-                <span class="sf-results-count" id="sf-count">
+            <div class="results-row">
+                <span class="results-count" id="sf-count">
                     <?php echo $total; ?> form<?php echo $total !== 1 ? 's' : ''; ?>
                 </span>
             </div>
 
             <?php if ($forms_query->have_posts()) : ?>
 
-                <ul class="issuances-list sf-list" id="sf-list">
+                <ul class="issuances-list" id="sf-list">
                     <?php while ($forms_query->have_posts()) : $forms_query->the_post();
                         $attachment = function_exists('get_field') ? get_field('attachment') : null;
 
@@ -86,20 +86,20 @@ $total = $forms_query->found_posts;
                                     <?php echo get_the_date('F j, Y'); ?>
                                 </span>
                             </div>
-                            <a href="<?php the_permalink(); ?>" class="sf-view-btn">
+                            <a href="<?php the_permalink(); ?>" class="list-view-btn">
                                 View <i class="fa fa-chevron-right"></i>
                             </a>
                         </li>
                     <?php endwhile; wp_reset_postdata(); ?>
                 </ul>
 
-                <div class="sf-no-results" id="sf-no-results" style="display:none;">
+                <div class="empty-state" id="sf-no-results" style="display:none;">
                     <i class="fa fa-search"></i>
                     <p>No forms matched your search.</p>
                 </div>
 
             <?php else : ?>
-                <div class="sf-empty-state">
+                <div class="empty-state">
                     <i class="fa fa-inbox"></i>
                     <p>No school forms have been published yet.</p>
                 </div>
@@ -109,118 +109,6 @@ $total = $forms_query->found_posts;
 
     </div><!-- /.sf-container -->
 </div><!-- /.sf-body -->
-
-
-<!-- ============================================================
-     STYLES
-     ============================================================ -->
-<style>
-.sf-body {
-    background: #f0f3f9;
-    padding: 56px 0 80px;
-}
-
-.sf-container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 0 28px;
-}
-
-.sf-panel {
-    border-radius: 8px;
-    box-shadow: var(--shadow-md);
-    overflow: hidden;
-}
-
-.sf-search input  { font-size: 14px; padding: 16px 20px; }
-.sf-search button { padding: 0 22px; font-size: 17px; }
-
-.sf-results-row {
-    padding: 12px 20px;
-    background: #f8f9ff;
-    border-bottom: 1px solid var(--border);
-}
-.sf-results-count {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-light);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* List */
-.sf-list li {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 16px 20px;
-    border-bottom: 1px solid #f0f3f9;
-    transition: background 0.15s;
-}
-.sf-list li:last-child { border-bottom: none; }
-.sf-list li:hover { background: #f5f7ff; }
-
-.sf-list li > .fa {
-    color: var(--deped-blue);
-    font-size: 22px;
-    flex-shrink: 0;
-}
-.sf-list li > div {
-    flex: 1;
-    min-width: 0;
-}
-.sf-list li > div > a {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-dark);
-    line-height: 1.5;
-    display: block;
-}
-.sf-list li > div > a:hover { color: var(--deped-blue); }
-
-.sf-view-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--deped-blue);
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    white-space: nowrap;
-    flex-shrink: 0;
-    opacity: 0;
-    transition: opacity 0.15s, transform 0.15s;
-}
-.sf-list li:hover .sf-view-btn {
-    opacity: 1;
-    transform: translateX(3px);
-}
-
-/* Empty / no results */
-.sf-empty-state,
-.sf-no-results {
-    text-align: center;
-    padding: 72px 24px;
-    color: var(--text-light);
-}
-.sf-empty-state .fa,
-.sf-no-results .fa {
-    font-size: 52px;
-    color: var(--deped-blue);
-    opacity: 0.18;
-    display: block;
-    margin-bottom: 16px;
-}
-.sf-empty-state p,
-.sf-no-results p { font-size: 15px; }
-
-@media only screen and (max-width: 768px) {
-    .sf-body      { padding: 40px 0 60px; }
-    .sf-container { padding: 0 16px; }
-    .sf-view-btn  { display: none; }
-}
-</style>
 
 
 <!-- ============================================================

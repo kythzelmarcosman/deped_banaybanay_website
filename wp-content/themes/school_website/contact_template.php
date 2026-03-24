@@ -2,10 +2,37 @@
 /**
  * Template Name: Contact Us Page
  *
- * Displays district contact information, email, phone/hotline,
- * and a clickable Google Maps screenshot.
+ * Displays district contact information pulled from ACF fields.
+ * ACF Field Group: Contact Us Fields
+ *   - email      (text / email)
+ *   - phone      (text)
+ *   - address    (textarea)
+ *   - map_image  (image)
+ *   - map_link   (url / text)
  */
 get_header();
+
+// ACF Fields
+$ct_email    = function_exists('get_field') ? get_field('email',     get_the_ID()) : '';
+$ct_phone    = function_exists('get_field') ? get_field('phone',     get_the_ID()) : '';
+$ct_address  = function_exists('get_field') ? get_field('address',   get_the_ID()) : '';
+$ct_map_img  = function_exists('get_field') ? get_field('map_image', get_the_ID()) : null;
+$ct_map_link = function_exists('get_field') ? get_field('map_link',  get_the_ID()) : '';
+
+// Resolve map image URL (ACF image returns array or plain URL)
+$map_img_url = '';
+$map_img_alt = 'Map of Banaybanay, Davao Oriental';
+if ($ct_map_img && is_array($ct_map_img)) {
+    $map_img_url = esc_url($ct_map_img['url']);
+    $map_img_alt = !empty($ct_map_img['alt']) ? esc_attr($ct_map_img['alt']) : $map_img_alt;
+} elseif ($ct_map_img && is_string($ct_map_img)) {
+    $map_img_url = esc_url($ct_map_img);
+}
+
+// Fallback map link
+$map_href = $ct_map_link
+    ? esc_url($ct_map_link)
+    : 'https://maps.google.com/?q=Banaybanay,Davao+Oriental,Philippines';
 ?>
 
 <!-- ============================================================
@@ -15,63 +42,72 @@ get_header();
     <div class="ct-container">
 
         <div class="section-heading">
-                <h2>Contact Us</h2>
+            <h2>Contact Us</h2>
         </div>
 
         <!-- ── Contact Cards ── -->
         <div class="ct-cards">
 
             <!-- Email -->
+            <?php if ($ct_email) : ?>
             <div class="ct-card">
                 <div class="ct-card-icon ct-icon-blue">
                     <i class="fa fa-envelope"></i>
                 </div>
                 <div class="ct-card-content">
                     <h3>Email Address</h3>
-                    <a href="mailto:banaybanay@deped.gov.ph">banaybanay@deped.gov.ph</a>
+                    <a href="mailto:<?php echo esc_attr($ct_email); ?>">
+                        <?php echo esc_html($ct_email); ?>
+                    </a>
                 </div>
             </div>
+            <?php endif; ?>
 
             <!-- Phone / Hotline -->
+            <?php if ($ct_phone) : ?>
             <div class="ct-card">
                 <div class="ct-card-icon ct-icon-yellow">
                     <i class="fa fa-phone"></i>
                 </div>
                 <div class="ct-card-content">
                     <h3>Phone / Hotline</h3>
-                    <a href="tel:+63XXXXXXXXXX">+63 XXX XXX XXXX</a>
-                    <span class="ct-card-note">Monday – Friday, 8:00 AM – 5:00 PM</span>
+                    <a href="tel:<?php echo esc_attr(preg_replace('/\s+/', '', $ct_phone)); ?>">
+                        <?php echo esc_html($ct_phone); ?>
+                    </a>
+                    <span class="ct-card-note">Monday &ndash; Friday, 8:00 AM &ndash; 5:00 PM</span>
                 </div>
             </div>
+            <?php endif; ?>
 
             <!-- Address -->
+            <?php if ($ct_address) : ?>
             <div class="ct-card">
                 <div class="ct-card-icon ct-icon-red">
                     <i class="fa fa-map-marker"></i>
                 </div>
                 <div class="ct-card-content">
                     <h3>Office Address</h3>
-                    <p>District of Banaybanay<br>
-                       Banaybanay, Davao Oriental<br>
-                       Philippines</p>
+                    <p><?php echo nl2br(esc_html($ct_address)); ?></p>
                 </div>
             </div>
+            <?php endif; ?>
 
         </div><!-- /.ct-cards -->
 
         <!-- ── Map ── -->
+        <?php if ($map_img_url) : ?>
         <div class="ct-map-section">
             <h2 class="ct-map-title">
                 <i class="fa fa-map"></i> Find Us on the Map
             </h2>
-            <a href="https://maps.google.com/?q=Banaybanay,Davao+Oriental,Philippines"
+            <a href="<?php echo $map_href; ?>"
                target="_blank"
                rel="noopener noreferrer"
                class="ct-map-link"
                title="Open in Google Maps">
 
-                <img src="<?php echo get_template_directory_uri(); ?>/assets/images/map-banaybanay.jpg"
-                     alt="Map of Banaybanay, Davao Oriental"
+                <img src="<?php echo $map_img_url; ?>"
+                     alt="<?php echo $map_img_alt; ?>"
                      class="ct-map-img">
 
                 <div class="ct-map-overlay">
@@ -87,6 +123,7 @@ get_header();
                 Click the map to get directions via Google Maps.
             </p>
         </div><!-- /.ct-map-section -->
+        <?php endif; ?>
 
     </div><!-- /.ct-container -->
 </div><!-- /.ct-body -->
@@ -266,18 +303,18 @@ get_header();
 
 /* ── Responsive ── */
 @media only screen and (max-width: 768px) {
-    .ct-body { padding: 40px 0 60px; }
+    .ct-body      { padding: 40px 0 60px; }
     .ct-container { padding: 0 16px; }
-    .ct-cards { grid-template-columns: 1fr; gap: 16px; }
-    .ct-card { flex-direction: row; text-align: left; padding: 22px 20px; }
+    .ct-cards     { grid-template-columns: 1fr; gap: 16px; }
+    .ct-card      { flex-direction: row; text-align: left; padding: 22px 20px; }
     .ct-card-icon { width: 50px; height: 50px; font-size: 20px; flex-shrink: 0; }
-    .ct-map-img { height: 260px; }
+    .ct-map-img   { height: 260px; }
 }
 
 @media only screen and (max-width: 480px) {
-    .ct-card { flex-direction: column; text-align: center; }
-    .ct-map-img { height: 200px; }
-    .ct-map-title { font-size: 14px; padding: 16px 18px; }
+    .ct-card        { flex-direction: column; text-align: center; }
+    .ct-map-img     { height: 200px; }
+    .ct-map-title   { font-size: 14px; padding: 16px 18px; }
     .ct-map-caption { padding: 12px 18px; }
 }
 </style>
