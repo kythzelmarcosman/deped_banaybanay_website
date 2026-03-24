@@ -29,8 +29,8 @@ define( 'DB_USER', $_ENV['MYSQLUSER'] ?: 'root' );
 /** Database password */
 define( 'DB_PASSWORD', $_ENV['MYSQLPASSWORD'] ?: '' );
 
-/** Database hostname */
-define( 'DB_HOST', $_ENV['MYSQLHOST'] ?: 'localhost' );
+/** Database hostname (Combines Host and Port) */
+define( 'DB_HOST', $_ENV['MYSQLHOST'] . ':' . $_ENV['MYSQLPORT'] );
 
 /** Database charset to use in creating database tables. */
 define( 'DB_CHARSET', 'utf8mb4' );
