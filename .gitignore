@@ -1,0 +1,35 @@
+# === SENSITIVE FILES ===
+wp-config.php
+
+# === WORDPRESS CORE (no need to upload, Railway will handle) ===
+wp-admin/
+wp-includes/
+
+# === UPLOADS (too large for GitHub) ===
+wp-content/uploads/
+
+# === CACHE ===
+wp-content/cache/
+wp-content/upgrade/
+
+# === ENVIRONMENT FILES ===
+.env
+.env.local
+
+# === OS FILES ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === LOGS ===
+*.log
+error_log
+debug.log
+
+# === NODE (if you use any JS tools) ===
+node_modules/
+
+# === IDE/EDITOR FILES ===
+.vscode/
+.idea/
+*.sublime-project
